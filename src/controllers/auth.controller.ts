@@ -81,7 +81,6 @@ export const login = async (
   try {
     const { email, password } = req.body;
     const userRepository = AppDataSource.getRepository(Users);
-    console.log("userRepository ==> ", userRepository);
 
     const user = await userRepository.findOne({
       where: { email },
@@ -172,7 +171,6 @@ export const getUserInfo = async (
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
       id: string;
     };
-    console.log("decoded ==> ", decoded);
 
     if (!decoded || !decoded.id) {
       res.status(403).json({
@@ -187,7 +185,6 @@ export const getUserInfo = async (
       where: { userId: decoded.id },
       relations: ["role", "profile"],
     });
-    console.log("user ==> ", user);
     if (!user) {
       res.status(404).json({
         success: false,
