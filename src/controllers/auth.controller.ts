@@ -17,6 +17,7 @@ import {
   UserInfoResponse,
 } from "../interfaces/auth/Auth";
 import { ErrorCode } from "../enums/ErrorCode";
+import { seedRoles } from "../seeders/roleSeeder";
 
 export const register = async (
   req: Request<{}, {}, RegisterRequest>,
@@ -31,26 +32,23 @@ export const register = async (
 
     const existingUser = await userRepository.findOne({ where: { email } });
     if (existingUser) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          error: {
-            errorCode: ErrorCode.EMAIL_EXISTS,
-            message: "Email already exists",
-          },
-        });
+      res.status(400).json({
+        success: false,
+        error: {
+          errorCode: ErrorCode.EMAIL_EXISTS,
+          message: "Email already exists",
+        },
+      });
       return;
     }
 
     const role = await roleRepository.findOne({ where: { name: roleName } });
     if (!role) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          error: { errorCode: ErrorCode.INVALID_ROLE, message: "Invalid role" },
-        });
+      res.status(400).json({
+        success: false,
+        error: { errorCode: ErrorCode.INVALID_ROLE, message: "Invalid role" },
+      });
+      seedRoles();
       return;
     }
 
@@ -66,12 +64,10 @@ export const register = async (
     });
     await userRepository.save(newUser);
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: { message: "User registered successfully" },
-      });
+    res.status(201).json({
+      success: true,
+      data: { message: "User registered successfully" },
+    });
   } catch (error) {
     next(error);
   }
@@ -93,15 +89,13 @@ export const login = async (
     });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      res
-        .status(401)
-        .json({
-          success: false,
-          error: {
-            errorCode: ErrorCode.INVALID_CREDENTIALS,
-            message: "That email and password combination is incorrect.",
-          },
-        });
+      res.status(401).json({
+        success: false,
+        error: {
+          errorCode: ErrorCode.INVALID_CREDENTIALS,
+          message: "That email and password combination is incorrect.",
+        },
+      });
       return;
     }
 
@@ -121,12 +115,10 @@ export const refreshToken = async (
 ): Promise<void> => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
-    res
-      .status(401)
-      .json({
-        success: false,
-        error: { errorCode: ErrorCode.TOKEN_EXPIRED, message: "Unauthorized" },
-      });
+    res.status(401).json({
+      success: false,
+      error: { errorCode: ErrorCode.TOKEN_EXPIRED, message: "Unauthorized" },
+    });
     return;
   }
 
@@ -135,12 +127,10 @@ export const refreshToken = async (
     process.env.REFRESH_TOKEN_SECRET!,
     (err: any, decoded: any) => {
       if (err) {
-        res
-          .status(403)
-          .json({
-            success: false,
-            error: { errorCode: ErrorCode.FORBIDDEN, message: "Invalid token" },
-          });
+        res.status(403).json({
+          success: false,
+          error: { errorCode: ErrorCode.FORBIDDEN, message: "Invalid token" },
+        });
         return;
       }
 
@@ -171,12 +161,10 @@ export const getUserInfo = async (
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res
-        .status(401)
-        .json({
-          success: false,
-          error: { errorCode: ErrorCode.UNAUTHORIZED, message: "Unauthorized" },
-        });
+      res.status(401).json({
+        success: false,
+        error: { errorCode: ErrorCode.UNAUTHORIZED, message: "Unauthorized" },
+      });
       return;
     }
 
@@ -187,12 +175,10 @@ export const getUserInfo = async (
     console.log("decoded ==> ", decoded);
 
     if (!decoded || !decoded.id) {
-      res
-        .status(403)
-        .json({
-          success: false,
-          error: { errorCode: ErrorCode.FORBIDDEN, message: "Invalid token" },
-        });
+      res.status(403).json({
+        success: false,
+        error: { errorCode: ErrorCode.FORBIDDEN, message: "Invalid token" },
+      });
       return;
     }
 
@@ -203,15 +189,13 @@ export const getUserInfo = async (
     });
     console.log("user ==> ", user);
     if (!user) {
-      res
-        .status(404)
-        .json({
-          success: false,
-          error: {
-            errorCode: ErrorCode.USER_NOT_FOUND,
-            message: "User not found",
-          },
-        });
+      res.status(404).json({
+        success: false,
+        error: {
+          errorCode: ErrorCode.USER_NOT_FOUND,
+          message: "User not found",
+        },
+      });
       return;
     }
 

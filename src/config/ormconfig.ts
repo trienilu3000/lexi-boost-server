@@ -17,5 +17,5 @@ export const AppDataSource = new DataSource({
   logging: false,
   entities: ["src/entities/*.ts"],
   migrations: ["src/migrations/*.ts"],
-  migrationsTableName: 'migrations',
+  migrationsTableName: "migrations",
 });
